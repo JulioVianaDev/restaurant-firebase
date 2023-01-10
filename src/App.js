@@ -4,6 +4,7 @@ import Cart from './Cart/Cart';
 import Header from './Layout/Header';
 import Meals from './Meals/Meals';
 import { useState } from 'react';
+import CartProvider from './context/CartProvider';
 
 
 function App() {
@@ -17,11 +18,13 @@ function App() {
     setCartIsShow(false);
   }
   return (
-    <div className="App">
-      {cartIsShow && <Cart onClose={hideCartHandler}/>}
-     <Header onShowCart={showCartHandler}/>
-     <Meals/>
-    </div>
+    <CartProvider>
+      <div className="App">
+        {cartIsShow && <Cart onClose={hideCartHandler}/>}
+      <Header onShowCart={showCartHandler}/>
+      <Meals/>
+      </div>
+    </CartProvider>
   );
 }
 
