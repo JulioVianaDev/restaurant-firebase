@@ -1,13 +1,14 @@
 import Modal from '../UI/Modal';
 import classes from './Cart.module.css';
-import { useContext } from 'react';
+import { useContext,useState } from 'react';
 import CartContext from '../context/cart-context.js'
 import CartItem from './CartItem';
+import Checkout from './Checkout';
 const Cart = (props) => {
   const cartContext =  useContext(CartContext);
   const totalAmount = `$ ${cartContext.totalAmount.toFixed(2)}`;
   const hasItems = cartContext.items.length > 0;
-
+  const [showForm,setShowForm]= useState(false)
   const cartItemRemoveHandler = id =>{
     cartContext.removeItem(id)
   }
@@ -15,7 +16,22 @@ const Cart = (props) => {
   const cartItemAddHandler = item=>{
     cartContext.addItem(item);
   }
+  const onClickHandler=()=>{
+    setShowForm(true)
+  }
+  const CloseForm=()=>{
+    setShowForm(false)
+  }
 
+  const submitOrder = (userData)=>{
+    fetch(`https://react-restaurant-http-default-rtdb.firebaseio.com/orders.json`,{
+      method: 'POST',
+      body: JSON.stringify({
+        user: userData,
+        orderedItems: cartContext.items
+      })
+    })
+  }
   const cartItems = (
     <ul className={classes['cart-items']}>
       {cartContext.items.map((item,index) => (
@@ -30,7 +46,12 @@ const Cart = (props) => {
       ))}
     </ul>
   );
-
+  const modalActions = (<div className={classes.actions}>
+                        <button className={classes['button--alt']} onClick={props.onClose}>
+                          Close
+                        </button>
+                        {hasItems &&<button className={classes.button} onClick={onClickHandler}>Order</button>}
+                      </div>)
   return (
     <Modal onClose={props.onClose}>
       {cartItems}
@@ -38,12 +59,8 @@ const Cart = (props) => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      <div className={classes.actions}>
-        <button className={classes['button--alt']} onClick={props.onClose}>
-          Close
-        </button>
-         {hasItems &&<button className={classes.button}>Order</button>}
-      </div>
+      {showForm && <Checkout onConfirm={submitOrder} CloseForm={CloseForm}/> }
+      {!showForm && modalActions}
     </Modal>
   );
 };
